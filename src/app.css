@@ -1,0 +1,444 @@
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   CodeNx — app.css
+   Order matters in Tailwind v4:
+   1. @import (fonts)         — external stylesheets
+   2. @import "tailwindcss"   — loads preflight + utilities
+   3. @theme { }              — design token → utility mapping
+   4. :root { }               — raw CSS custom properties
+   5. Base styles             — body, html overrides
+   6. @layer utilities { }    — custom utility classes
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── 1. Tailwind v4 entry point ─────────────────────────────
+   Replaces the old @tailwind base / components / utilities.
+   Preflight (CSS reset) is included automatically.           */
+
+/* ─── 3. @theme — Design token → Tailwind utility mapping ──
+   Every --color-* here becomes a bg-*, text-*, border-* etc.
+   Every --font-*   becomes a font-* utility.
+   Every --shadow-* becomes a shadow-* utility.
+   Every --radius-* becomes a rounded-* utility.
+
+   Naming convention: bg-gold-bg, text-gold-text,
+   border-border-gold, shadow-md, rounded-lg, font-sans       */
+@theme {
+  /* Font */
+  --font-sans: 'Karla', sans-serif;
+
+  /* ── Backgrounds ── */
+  --color-bg-base:  #faf7f2;   /* bg-bg-base  */
+  --color-bg-panel: #f4efe6;   /* bg-bg-panel */
+  --color-bg-card:  #ffffff;   /* bg-bg-card  */
+  --color-bg-hover: #fdf9f3;   /* bg-bg-hover */
+
+  /* ── Borders ── */
+  --color-border:      #e5d9c8;   /* border-border      */
+  --color-border-gold: #c9922244; /* border-border-gold */
+
+  /* ── Gold (primary accent) ── */
+  --color-gold:        #b07d1a;   /* text-gold        */
+  --color-gold-bright: #d4920e;   /* text-gold-bright */
+  --color-gold-deep:   #8a6010;   /* text-gold-deep   */
+  --color-gold-glow:   #c9922215; /* bg-gold-glow     */
+  --color-gold-text:   #7a5510;   /* text-gold-text   */
+  --color-gold-bg:     #fef3d8;   /* bg-gold-bg       */
+
+  /* ── Amber (secondary / warning) ── */
+  --color-amber:    #c05c00;   /* text-amber    */
+  --color-amber-bg: #fff0e0;   /* bg-amber-bg   */
+  --color-copper:   #92400e;   /* text-copper   */
+
+  /* ── Sage (success / AI / positive) ── */
+  --color-sage:      #3d6b35;   /* text-sage      */
+  --color-sage-bg:   #edf6eb;   /* bg-sage-bg     */
+  --color-sage-text: #2d5227;   /* text-sage-text */
+
+  /* ── Steel (info / neutral blue) ── */
+  --color-steel:      #2c4f72;   /* text-steel      */
+  --color-steel-bg:   #e8f0f8;   /* bg-steel-bg     */
+  --color-steel-text: #1e3a56;   /* text-steel-text */
+
+  /* ── Rose (destructive / error) ── */
+  --color-rose:    #b91c1c;   /* text-rose    */
+  --color-rose-bg: #fef0f0;   /* bg-rose-bg   */
+
+  /* ── Text ── */
+  --color-text-primary: #1c140a;   /* text-text-primary */
+  --color-text-muted:   #7a6a52;   /* text-text-muted   */
+  --color-text-dim:     #b8a88a;   /* text-text-dim     */
+
+  /* ── Radius ── */
+  /* In v4: --radius maps to rounded, --radius-lg to rounded-lg */
+  --radius:    7px;    /* rounded    */
+  --radius-lg: 13px;   /* rounded-lg */
+  --radius-xl: 20px;   /* rounded-xl */
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px #00000010, 0 1px 2px #00000008;
+  --shadow-md: 0 4px 16px #00000012, 0 2px 6px #00000008;
+  --shadow-lg: 0 10px 36px #0000001a;
+  --shadow-xl: 0 20px 60px #00000018, 0 8px 20px #00000010;
+
+  /* ── Animations ── */
+  --animate-fade-up: fadeUp 0.5s ease both;
+  --animate-pulse:   pulse  2s   ease-in-out infinite;
+  --animate-float:   floatY 3.2s ease-in-out infinite;
+}
+
+/* ─── 4. :root — Raw CSS custom properties ──────────────────
+   These are NOT Tailwind utilities — they're used directly
+   in component <style> blocks via var(--token).
+
+   Note: shadcn-svelte reads from these exact var names.
+   We alias our design tokens into shadcn's expected names
+   so every shadcn component inherits our palette with no
+   extra config. The --border conflict is resolved by using
+   a dedicated shadcn block below our token block.            */
+:root {
+  /* ── Design token aliases (for component var() usage) ── */
+  --bg-base:    #faf7f2;
+  --bg-panel:   #f4efe6;
+  --bg-card:    #ffffff;
+  --bg-hover:   #fdf9f3;
+
+  --border-color:  #e5d9c8;   /* used as var(--border-color) in components */
+  --border-gold:   #c9922244;
+
+  --gold:        #b07d1a;
+  --gold-bright: #d4920e;
+  --gold-deep:   #8a6010;
+  --gold-glow:   #c9922215;
+  --gold-text:   #7a5510;
+  --gold-bg:     #fef3d8;
+
+  --amber:    #c05c00;
+  --amber-bg: #fff0e0;
+  --copper:   #92400e;
+
+  --sage:      #3d6b35;
+  --sage-bg:   #edf6eb;
+  --sage-text: #2d5227;
+
+  --steel:      #2c4f72;
+  --steel-bg:   #e8f0f8;
+  --steel-text: #1e3a56;
+
+  --rose:    #b91c1c;
+  --rose-bg: #fef0f0;
+
+  --text-primary: #1c140a;
+  --text-muted:   #7a6a52;
+  --text-dim:     #b8a88a;
+
+  --shadow-sm: 0 1px 3px #00000010, 0 1px 2px #00000008;
+  --shadow-md: 0 4px 16px #00000012, 0 2px 6px #00000008;
+  --shadow-lg: 0 10px 36px #0000001a;
+  --shadow-xl: 0 20px 60px #00000018, 0 8px 20px #00000010;
+
+  --radius:    7px;
+  --radius-lg: 13px;
+  --radius-xl: 20px;
+}
+
+/* ── shadcn-svelte CSS variable overrides ──────────────────
+   shadcn reads these exact names. We map our design tokens
+   onto shadcn's expected vars so all shadcn components
+   (Button, Badge, Card, Input, Dialog, etc.) inherit our
+   palette automatically. No component-level overrides needed.
+
+   IMPORTANT: shadcn uses --border as a shorthand (not a
+   color name clash with Tailwind's border utilities in v4,
+   since Tailwind v4 uses --color-border for that).          */
+:root {
+  --background:             #faf7f2;   /* bg-base      */
+  --foreground:             #1c140a;   /* text-primary  */
+
+  --card:                   #ffffff;
+  --card-foreground:        #1c140a;
+
+  --popover:                #ffffff;
+  --popover-foreground:     #1c140a;
+
+  --primary:                #d4920e;   /* gold-bright  */
+  --primary-foreground:     #ffffff;
+
+  --secondary:              #f4efe6;   /* bg-panel     */
+  --secondary-foreground:   #1c140a;
+
+  --muted:                  #f4efe6;
+  --muted-foreground:       #7a6a52;   /* text-muted   */
+
+  --accent:                 #fef3d8;   /* gold-bg      */
+  --accent-foreground:      #7a5510;   /* gold-text    */
+
+  --destructive:            #b91c1c;   /* rose         */
+  --destructive-foreground: #ffffff;
+
+  /* shadcn uses --border, --input, --ring as raw values */
+  --border: #e5d9c8;
+  --input:  #e5d9c8;
+  --ring:   #d4920e;   /* gold-bright — focus ring */
+
+  /* shadcn radius token */
+  --radius: 0.4375rem;   /* 7px */
+}
+
+/* ─── 5. Base styles ────────────────────────────────────────
+   Tailwind preflight already resets margins, box-sizing etc.
+   We only override what's specific to our design.            */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Karla', sans-serif;
+  background-color: #faf7f2;
+  color: #1c140a;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── 6. @layer utilities — Custom utility classes ──────────
+   Anything here is part of Tailwind's utility layer and can
+   be used alongside Tailwind classes. Tailwind v4 will purge
+   unused ones in production automatically.                   */
+@layer utilities {
+
+  /* ── Container ── */
+  .container-landing {
+    max-width: 1160px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  /* ── Gradient text ── */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #d4920e, #c05c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Background textures ── */
+  .bg-dots {
+    background-image: radial-gradient(circle, #c9922222 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(#c9922210 1px, transparent 1px),
+      linear-gradient(90deg, #c9922210 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .bg-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 12px,
+      #c9922208 12px,
+      #c9922208 13px
+    );
+  }
+  .bg-diamond {
+    background-image:
+      repeating-linear-gradient( 45deg, transparent, transparent 18px, #c9922211 18px, #c9922211 19px),
+      repeating-linear-gradient(-45deg, transparent, transparent 18px, #c9922211 18px, #c9922211 19px);
+  }
+
+  /* ── Gold shimmer divider ── */
+  .shimmer-line {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #b07d1a 30%,
+      #d4920e 50%,
+      #b07d1a 70%,
+      transparent 100%
+    );
+    opacity: 0.35;
+  }
+
+  /* ── Status pills ── */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .pill-gold  { background: #fef3d8; color: #7a5510; border: 1px solid #c9922244; }
+  .pill-gold::before  { background: #d4920e; }
+  .pill-sage  { background: #edf6eb; color: #2d5227; border: 1px solid #3d6b3533; }
+  .pill-sage::before  { background: #3d6b35; }
+  .pill-amber { background: #fff0e0; color: #c05c00; border: 1px solid #c0590025; }
+  .pill-amber::before { background: #c05c00; }
+  .pill-rose  { background: #fef0f0; color: #b91c1c; border: 1px solid #b91c1c25; }
+  .pill-rose::before  { background: #b91c1c; }
+  .pill-steel { background: #e8f0f8; color: #1e3a56; border: 1px solid #2c4f7233; }
+  .pill-steel::before { background: #2c4f72; }
+
+  /* ── Section header helpers ── */
+  .section-eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #7a5510;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #1c140a;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  .section-desc {
+    font-size: 16px;
+    color: #7a6a52;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+
+  /* ── Shared button variants ──
+     Use alongside Tailwind layout classes, e.g.:
+     <button class="btn-gold flex items-center gap-2 px-6 py-3 rounded-lg"> */
+  .btn-gold {
+    background: linear-gradient(135deg, #d4920e, #c05c00);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 10px #c9922230, inset 0 1px 0 #ffffff1a;
+    transition: all 0.15s;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-gold:hover {
+    box-shadow: 0 4px 20px #c9922250;
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid #e5d9c8;
+    color: #7a6a52;
+    transition: all 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-ghost:hover {
+    background: #f4efe6;
+    color: #1c140a;
+    border-color: #c9922244;
+  }
+  .btn-outline-gold {
+    background: transparent;
+    border: 1.5px solid #d4920e;
+    color: #7a5510;
+    transition: all 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-outline-gold:hover { background: #fef3d8; }
+
+  /* ── Animation helpers ── */
+  .animate-fade-up { animation: fadeUp 0.5s ease both; }
+  .animate-float   { animation: floatY 3.2s ease-in-out infinite; }
+
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.12s; }
+  .delay-3 { animation-delay: 0.20s; }
+  .delay-4 { animation-delay: 0.28s; }
+  .delay-5 { animation-delay: 0.36s; }
+}
+
+/* ─── Keyframes (outside @layer so they're always available) */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e5d9c8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b8a88a; }
+
+/* ─── Focus ring ─────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #d4920e;
+  outline-offset: 3px;
+  border-radius: 7px;
+}
+
+/* ─── Dropdown/Select Theme ─────────────────────────────── */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23d4920e'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  background-size: 0.8em;
+  padding-right: 1.4rem !important;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select:focus {
+  accent-color: #d4920e;
+  outline: none;
+}
+
+/* Note: Styling native options is limited by OS/Browser. 
+   We use a linear-gradient trick that works in some Chromium versions. */
+option {
+  background-color: #ffffff;
+  color: #1c140a;
+}
+
+option:checked {
+  background: #fef3d8 linear-gradient(0deg, #fef3d8 0%, #fef3d8 100%) !important;
+  color: #7a5510 !important;
+}
+
+option:hover, option:focus, option:active {
+  background: #fef3d8 linear-gradient(0deg, #fef3d8 0%, #fef3d8 100%) !important;
+  background-color: #fef3d8 !important;
+}
