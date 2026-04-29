@@ -15,6 +15,7 @@
 	// Modal state
 	let showModal = $state(false);
 	let projectName = $state('');
+  let chatId = $state('');
 	let creating = $state(false);
 
 	onMount(async () => {
@@ -35,7 +36,7 @@
 
 		creating = true;
 		try {
-			const res = await POST(fetch, '/api/project', { name: projectName.trim() });
+			const res = await POST(fetch, '/api/project', { name: projectName.trim(), chatId });
 			toast.success('Project created successfully!');
 			showModal = false;
 			projectName = '';
@@ -159,6 +160,23 @@
 							class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
 						/>
 						<p class="mt-2 text-xs text-gray-500">{projectName.length}/100 characters</p>
+					</div>
+          <div>
+						<label for="project-name" class="block text-sm font-medium text-gray-700 mb-2">
+							Chat ID
+						</label>
+						<Input
+							type="text"
+							id="chat-id"
+							name="chat-id"
+							placeholder="Enter Chat ID"
+							bind:value={chatId}
+							required
+							disabled={creating}
+							maxlength={100}
+							class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
+						/>
+						<p class="mt-2 text-xs text-gray-500">{chatId.length}/100 characters</p>
 					</div>
 				</div>
 

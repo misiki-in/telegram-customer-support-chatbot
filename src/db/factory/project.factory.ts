@@ -49,13 +49,7 @@ export async function getOneDetailed(id: string) {
   return db.query.Project.findFirst({
     where: eq(Project.id, id),
     with: {
-      domains: true,
-      owner: {
-        columns: {
-          productSyncLimit: true,
-          tier: true
-        }
-      }
+      bot: true,
     }
   })
 }
@@ -66,12 +60,5 @@ export async function list() {
       createdAt: false,
       updatedAt: false,
     },
-    with: {
-      domains: {
-        columns: {
-          domain: true,
-        }
-      }
-    }
   })
 }

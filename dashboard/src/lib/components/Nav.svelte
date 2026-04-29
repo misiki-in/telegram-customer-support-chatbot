@@ -58,7 +58,7 @@
 
 			<!-- Desktop Actions -->
 			<div class="hidden items-center gap-3 md:flex">
-				{#if tier === 'free'}
+				<!-- {#if tier === 'free'}
 					<a
 						href="/upgrade"
 						class="flex items-center gap-2 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-extrabold text-black transition-all hover:bg-yellow-500 hover:scale-105 active:scale-95 shadow-lg shadow-yellow-400/20"
@@ -66,15 +66,7 @@
 						<Star class="h-4 w-4 fill-black" />
 						Upgrade to Pro
 					</a>
-				{/if}
-				<a
-					href={extensionDownloadLink}
-					download="extension.zip"
-					class="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2"
-				>
-					<Download class="h-4 w-4" />
-					Download Extension
-				</a>
+				{/if} -->
 				<Button
 					variant="ghost"
 					onclick={logout}

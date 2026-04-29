@@ -53,6 +53,7 @@ router.put('/:id', async (c) => {
 
   await factory.project.update(project.id, {
     name: body.name || undefined,
+    chatId: body.chatId || undefined,
   })
 
   return c.json({ }, 200)

@@ -7,7 +7,7 @@ import {
 	varchar
 } from 'drizzle-orm/pg-core';
 import { id, timestamps, varcharId } from '../helpers';
-import { User } from '.';
+import { Bot, User } from '.';
 
 export const Project = pgTable(
 	'projects',
@@ -16,7 +16,10 @@ export const Project = pgTable(
     ownerId: varcharId('owner_id')
       .notNull()
       .references(() => User.id),
+    isActive: boolean('is_active').notNull().default(true),
     name: varchar('name').notNull(),
+    botId: varcharId('bot_id')
+      .references(() => Bot.id),
     chatId: varchar('chat_id').notNull(),
     botToken: varchar('bot_token'),
     lastSyncedAt: timestamp('last_synced_at').defaultNow().notNull(),
@@ -32,6 +35,10 @@ export const ProjectRelations = relations(Project, ({ one, many }) => ({
     fields: [Project.ownerId],
     references: [User.id]
   }),
+  bot: one(Bot, {
+    fields: [Project.botId],
+    references: [Bot.id]
+  })
 }));
 
 export type Project = InferSelectModel<typeof Project>;
