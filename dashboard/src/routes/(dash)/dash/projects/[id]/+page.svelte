@@ -16,6 +16,9 @@
 		isActive: boolean;
 		createdAt: string;
 		updatedAt: string;
+    bot: {
+      token: string;
+    } | null
 	}
 
 	let project: Project | null = $state(null);
@@ -30,6 +33,11 @@
   let chatId = $state('');
 	let updatingProject = $state(false);
 
+	// Bot Modal state
+	let showBotSettingsModal = $state(false);
+	let botToken = $state('');
+	let updatingBotToken = $state(false);
+
 	function openNameModal() {
 		if (project) {
 			projectName = project.name;
@@ -43,6 +51,16 @@
 		projectName = '';
 	}
 
+	function openBotSettingsModal() {
+		showBotSettingsModal = true;
+    botToken = project?.bot?.token || ''
+	}
+
+	function closeBotSettingsModal() {
+		showBotSettingsModal = false;
+		botToken = '';
+	}
+
 	// Sync state
 	let selectedInterval = $state('');
 	let updatingInterval = $state(false);
@@ -53,11 +71,6 @@
 		try {
 			project = await GET<Project>(fetch, `/api/project/${page.params.id}`);
 			loading = false;
-
-			// Set initial interval from project data
-			if (project?.interval?.tag) {
-				selectedInterval = project.interval.tag;
-			}
 		} catch (e: any) {
 			error = e.message;
 			loading = false;
@@ -89,6 +102,25 @@
 		}
 	}
 
+	async function updateBotToken() {
+		if (!botToken.trim()) {
+			toast.error('Bot token is required');
+			return;
+		}
+
+		updatingBotToken = true;
+		try {
+			await PUT(fetch, `/api/project/${project?.id}/bot`, { botToken: botToken.trim() });
+			toast.success('Bot settings updated successfully!');
+			showBotSettingsModal = false;
+			botToken = '';
+		} catch (e: any) {
+			toast.error(e.message || 'Failed to update bot settings');
+		} finally {
+			updatingBotToken = false;
+		}
+	}
+
 	async function copyKey() {
 		if (project?.id) {
 			await navigator.clipboard.writeText(project.id);
@@ -111,75 +143,11 @@
 		});
 	}
 
-	async function updateSyncInterval() {
-		if (!project?.id || !selectedInterval) return;
-
-    const domain = project.domains?.[0]
-    if (!domain)
-      return toast.error('No Domain associated')
-
-		updatingInterval = true;
-
-		try {
-			await PUT(fetch, `/api/store/info`, {
-				intervalTag: selectedInterval
-			}, {
-				'x-site-domain': domain.domain
-      });
-
-			toast.success('Sync interval updated successfully');
-
-			// Update local project data
-			if (project) {
-				const newIntervalValue = project.intervalTags?.find(tag => tag === selectedInterval)
-					? parseInt(selectedInterval) * 60 // assuming tag is minutes, convert to seconds
-					: undefined;
-
-				project.interval = selectedInterval
-					? { tag: selectedInterval, interval: newIntervalValue || project.interval?.interval || 0 }
-					: undefined;
-			}
-		} catch (e: any) {
-			toast.error(e instanceof Error ? e.message : 'Failed to update sync interval');
-		} finally {
-			updatingInterval = false;
-		}
-	}
-
-	async function triggerSync() {
-		if (!project?.id) return;
-    
-    const domain = project.domains?.[0]
-    if (!domain)
-      return toast.error('No Domain associated')
-
-		syncing = true;
-
-		try {
-			// Using the correct endpoint as per the PHP plugin
-			const response = await POST(fetch, `/api/store/sync`, {}, {
-				'x-site-domain': domain.domain
-			});
-
-			toast.success('Sync triggered successfully');
-
-			// Refresh project data to show updated lastSyncedAt
-			try {
-				project = await GET<Project>(fetch, `/api/project/${page.params.id}`);
-			} catch (e) {
-				// Silently refresh fail, keep current data
-			}
-		} catch (e: any) {
-			toast.error(e instanceof Error ? e.message : 'Failed to trigger sync');
-		} finally {
-			syncing = false;
-		}
-	}
-
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			if (showNameModal) closeNameModal();
 			if (showSyncModal) showSyncModal = false;
+			if (showBotSettingsModal) closeBotSettingsModal();
 		}
 	}
 </script>
@@ -230,6 +198,17 @@
 					</div>
 
 					<div class="flex flex-col sm:flex-row gap-2 sm:gap-2">
+						<Button
+							variant="secondary"
+							onclick={openBotSettingsModal}
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+							</svg>
+							Bot Settings
+						</Button>
+
 						<Button
 							onclick={copyKey}
 							class={copied ? 'bg-green-600 hover:bg-green-700' : ''}
@@ -297,67 +276,6 @@
 		</header>
 	</div>
 
-	<!-- Edit Sync Interval Modal -->
-	{#if showSyncModal}
-		<div class="fixed inset-0 z-50 overflow-y-auto" style="display: flex; align-items: center; justify-content: center;">
-			<!-- Backdrop -->
-			<div
-				class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-				onclick={() => showSyncModal = false}
-				onkeydown={(e) => e.key === 'Escape' && (showSyncModal = false)}
-				tabindex="-1"
-				role="presentation"
-			></div>
-
-			<!-- Modal Panel -->
-			<div class="relative z-10 w-full max-w-md mx-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-				<div class="bg-white rounded-xl shadow-2xl">
-					<div class="px-6 py-4 border-b border-gray-200">
-						<h3 id="modal-title" class="text-lg font-semibold text-gray-900">Edit Sync Interval</h3>
-					</div>
-					<div class="p-6">
-						<label for="modal-sync-interval" class="block text-sm font-medium text-gray-700 mb-2">
-							Choose sync interval
-						</label>
-						<select
-							id="modal-sync-interval"
-							bind:value={selectedInterval}
-							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-						>
-							{#each project?.intervalTags || [] as tag}
-								<option value={tag}>{tag}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-						<Button
-							variant="secondary"
-							onclick={() => showSyncModal = false}
-							class="bg-gray-200 hover:bg-gray-300 border-none"
-						>
-							Cancel
-						</Button>
-						<Button
-							onclick={() => {
-								updateSyncInterval();
-								showSyncModal = false;
-							}}
-							disabled={updatingInterval || selectedInterval === project?.interval?.tag}
-						>
-							{#if updatingInterval}
-								<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-								</svg>
-							{/if}
-							Update
-						</Button>
-					</div>
-				</div>
-			</div>
-		</div>
-	{/if}
-
 	<!-- Edit Project Name Modal -->
 	{#if showNameModal}
 		<!-- Backdrop -->
@@ -411,7 +329,7 @@
 							<p class="mt-2 text-xs text-gray-500">{projectName.length}/100 characters</p>
 						</div>
 						<div>
-							<label for="edit-project-name" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="edit-chat-id" class="block text-sm font-medium text-gray-700 mb-2">
 								Chat ID
 							</label>
 							<Input
@@ -425,7 +343,7 @@
 								maxlength={100}
 								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
 							/>
-							<p class="mt-2 text-xs text-gray-500">{projectName.length}/100 characters</p>
+							<p class="mt-2 text-xs text-gray-500">{chatId.length}/100 characters</p>
 						</div>
 					</div>
 
@@ -446,6 +364,90 @@
 							class="w-full sm:w-auto px-4 py-3"
 						>
 							{#if updatingProject}
+								<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+								<span>Updating...</span>
+							{:else}
+								<span>Update </span>
+							{/if}
+						</Button>
+					</div>
+				</form>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Bot Settings Modal -->
+	{#if showBotSettingsModal}
+		<!-- Backdrop -->
+		<div
+			class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
+			onclick={closeBotSettingsModal}
+			role="button"
+			tabindex="0"
+			aria-label="Close modal"
+		></div>
+
+		<!-- Modal -->
+		<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+			<div
+				class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="bot-modal-title"
+			>
+				<!-- Header -->
+				<div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+					<h2 id="bot-modal-title" class="text-lg font-semibold text-gray-900">Bot Settings</h2>
+					<Button
+						variant="ghost"
+						onclick={closeBotSettingsModal}
+						class="rounded-lg p-2"
+						aria-label="Close"
+					>
+						<X class="h-5 w-5" />
+					</Button>
+				</div>
+
+				<!-- Content -->
+				<form onsubmit={(e) => { e.preventDefault(); updateBotToken(); }} class="px-6 py-6">
+					<div class="space-y-4">
+            			<div>
+							<label for="edit-bot-token" class="block text-sm font-medium text-gray-700 mb-2">
+								Bot Token
+							</label>
+							<Input
+								type="text"
+								id="edit-bot-token"
+								name="bot-token"
+								placeholder="Enter Bot Token"
+								bind:value={botToken}
+								required
+								disabled={updatingBotToken}
+								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
+							/>
+						</div>
+					</div>
+
+					<!-- Actions -->
+					<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-2">
+						<Button
+							type="button"
+							variant="secondary"
+							onclick={closeBotSettingsModal}
+							disabled={updatingBotToken}
+							class="w-full sm:w-auto px-4 py-3"
+						>
+							Cancel
+						</Button>
+						<Button
+							type="submit"
+							disabled={updatingBotToken}
+							class="w-full sm:w-auto px-4 py-3"
+						>
+							{#if updatingBotToken}
 								<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
 									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

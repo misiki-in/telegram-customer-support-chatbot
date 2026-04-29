@@ -21,7 +21,6 @@ export const Project = pgTable(
     botId: varcharId('bot_id')
       .references(() => Bot.id),
     chatId: varchar('chat_id').notNull(),
-    botToken: varchar('bot_token'),
     lastSyncedAt: timestamp('last_synced_at').defaultNow().notNull(),
 		...timestamps
 	},

@@ -24,6 +24,10 @@ export const userUpgradeSchema = z.strictObject({
   envatoPurchaseCode: z.string().min(1, "Purchase code is required"),
 })
 
+export const projectBotUpdation = z.strictObject({
+  botToken: z.string().nonoptional(),
+})
+
 export const projectUpdationSchema = z.strictObject({
   name: z.string().min(1, "Name is required").optional(),
   chatId: z.string().min(1, "Chat ID is required").optional(),
@@ -43,3 +47,4 @@ export const sendSchema = z.strictObject({
 export const chatEmailSchema = z.strictObject({
   email: z.email().nonoptional(),
 })
+

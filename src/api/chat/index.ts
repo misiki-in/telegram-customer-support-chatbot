@@ -25,7 +25,7 @@ router.post('/send', async (c) => {
     sessionId,
   })
   await sendMessage(
-    project.botToken || env.DEFAULT_BOT_TOKEN,
+    project.bot?.token || env.DEFAULT_BOT_TOKEN,
     project.chatId,
     formatted
   )
@@ -43,7 +43,7 @@ router.post('/email', async (c) => {
 
   const formatted = formatChatEmail(body, sessionId)
   await sendMessage(
-    project.botToken || env.DEFAULT_BOT_TOKEN,
+    project.bot?.token || env.DEFAULT_BOT_TOKEN,
     project.chatId,
     formatted
   )

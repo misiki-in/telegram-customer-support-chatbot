@@ -3,6 +3,22 @@ import { db } from "..";
 import { CreateProject, Project, UpdateProject } from "../schema";
 import { projectCache } from "@/utils";
 
+export type ProjectRecord = {
+    id: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    ownerId: string;
+    isActive: boolean;
+    botId: string | null;
+    chatId: string;
+    botToken: string | null;
+    lastSyncedAt: Date;
+    bot: {
+        token: string;
+    } | null;
+}
+
 export async function create(inputs: CreateProject) {
   const [row] = await db
     .insert(Project)
@@ -33,11 +49,18 @@ export async function getByOwnerId(ownerId: string) {
 }
 
 export async function getOne(id: string) {
-  const cache = projectCache.get<Project>(id)
+  const cache = projectCache.get<ProjectRecord>(id)
   if (cache) return cache
 
   const row = await db.query.Project.findFirst({
     where: eq(Project.id, id),
+    with: {
+      bot: {
+        columns: {
+          token: true
+        }
+      }
+    }
   })
 
   if (!row) return null

@@ -2,7 +2,7 @@ import { factory } from "@/db";
 import { populateAuth } from "@/middlware";
 import { HonoApp } from "@/types";
 import { getUserFromSession, sendError } from "@/utils";
-import { projectCreationSchema, projectUpdationSchema } from "@/utils/validation";
+import { projectBotUpdation, projectCreationSchema, projectUpdationSchema } from "@/utils/validation";
 import { Hono } from "hono";
 
 const router = new Hono<HonoApp>();
@@ -38,6 +38,41 @@ router.post('/', async (c) => {
   })
 
   return c.json({ id: project.id }, 200)
+})
+
+router.put('/:id/bot', async (c) => {
+  const user = getUserFromSession(c)
+  const body = projectBotUpdation.parse(await c.req.json())
+
+  const project = await factory.project.getOne(c.req.param('id'))
+  if (!project)
+    sendError("Project not found", 404)
+
+  if (project.ownerId !== user.id)
+    sendError("Project doesnot belong to you", 403)
+
+  const oldProjectBotId = project.botId
+  const bot = await factory.bot.getOneByToken(body.botToken)
+  if (!bot) {
+    const { id } = await factory.bot.create({
+      token: body.botToken,
+    })
+    await factory.project.update(project.id, {
+      botId: id,
+    })
+  } else {
+    await factory.project.update(project.id, {
+      botId: bot.id,
+    })
+  }
+
+  if (oldProjectBotId) {
+    const projectCount = await factory.bot.getProjectCount(oldProjectBotId)
+    if (projectCount == 0)
+      await factory.bot.remove(oldProjectBotId)
+  }
+
+  return c.json({ success: true }, 200)
 })
 
 router.put('/:id', async (c) => {

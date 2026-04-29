@@ -7,6 +7,7 @@ export const Bot = pgTable("bots", {
   id: id('bot'),
   isActive: boolean('is_active').notNull().default(true),
   token: varchar('token')
+    .unique()
     .notNull(),
   lastSeenUpdateId: integer().notNull().default(0),
   ...timestamps,
