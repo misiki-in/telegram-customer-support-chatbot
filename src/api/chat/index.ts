@@ -58,8 +58,10 @@ router.get('/history', async (c) => {
   return c.json(messages, 200)
 })
 
-router.post('/receive', async (c) => {
-  return c.json({}, 200)
-})
+router.get('/receive', async (c) => {
+  const sessionId = getSessionId(c)
+  const messages = await factory.chat.listUnreceivedAndUpdate(sessionId)
+  return c.json(messages, 200)
+})	
 
 export default router

@@ -19,3 +19,9 @@ export function getSessionId(c: Context) {
   if (!key) sendError("x-session-id header missing", 400);
   return key;
 }
+
+export function delay(ms: number) {
+  return new Promise((res, rej) => {
+    setTimeout(res, ms)
+  })
+}

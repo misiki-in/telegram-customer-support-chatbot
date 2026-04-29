@@ -14,9 +14,9 @@ export const Chat = pgTable(
   {
     id: id('pr'),
     projectId: varcharId('project_id')
-      .notNull()
       .references(() => Project.id),
     sessionId: varchar('session_id').notNull(),
+    isReceived: boolean('is_received').notNull().default(false),
     message: varchar('message').notNull(),
     metadata: jsonb('metadata').notNull(),
     isSystem: boolean('is_system').notNull(),

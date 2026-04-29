@@ -102,51 +102,52 @@
     }
   });
 
-  onMount(() => {
-    (async () => {
-      // Initialize or retrieve sessionId
-      sessionId = localStorage.getItem("chat_session_id") || "";
-      if (!sessionId) {
-        sessionId = Math.random().toString(36).substring(2, 15);
-        localStorage.setItem("chat_session_id", sessionId);
-      }
+  onMount(async () => {
+    // Initialize or retrieve sessionId
+    sessionId = localStorage.getItem("chat_session_id") || "";
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem("chat_session_id", sessionId);
+    }
 
-      // 1. Fetch chat history
-      try {
-        const data = await GET(`/api/chat/history`);
-        messages = data.map((m: any) => ({
-          id: `history-${Math.random()}`,
-          text: m.message,
-          sender: m.isSystem ? "agent": "user",
-          timestamp: new Date(m.createdAt),
-        }));
-      } catch (e) {
-        console.error("Failed to fetch chat history", e);
-      }
+    // 1. Fetch chat history
+    try {
+      const data = await GET(`/api/chat/history`);
+      if (!data.length) return;
+      messages = data.map((m: any) => ({
+        id: `history-${Math.random()}`,
+        text: m.message,
+        sender: m.isSystem ? "agent" : "user",
+        timestamp: new Date(m.createdAt),
+      }));
+    } catch (e) {
+      console.error("Failed to fetch chat history", e);
+    }
 
-      // Check for existing answers in localStorage
-      const businessType = localStorage.getItem("chat_business_type");
-      const annualRevenue = localStorage.getItem("chat_annual_revenue");
+    // Check for existing answers in localStorage
+    const businessType = localStorage.getItem("chat_business_type");
+    const annualRevenue = localStorage.getItem("chat_annual_revenue");
 
-      if (businessType && annualRevenue) {
-        emailCaptured = true;
-      } else if (localStorage.getItem("chat_manually_closed") === "true") {
-        // Do nothing
-      } else if (messages.length <= 1) {
-        // After 5 seconds on the website, auto-trigger the engagement bot if no history
-        engagementTimer = setTimeout(() => {
-          if (!isOpen && messages.length <= 1) {
-            if (
-              !localStorage.getItem("chat_business_type") &&
-              localStorage.getItem("chat_manually_closed") !== "true"
-            ) {
-              pushEngagementQuestions();
-            }
+    if (businessType && annualRevenue) {
+      emailCaptured = true;
+    } else if (localStorage.getItem("chat_manually_closed") === "true") {
+      // Do nothing
+    } else if (messages.length <= 1) {
+      // After 5 seconds on the website, auto-trigger the engagement bot if no history
+      engagementTimer = setTimeout(() => {
+        if (!isOpen && messages.length <= 1) {
+          if (
+            !localStorage.getItem("chat_business_type") &&
+            localStorage.getItem("chat_manually_closed") !== "true"
+          ) {
+            pushEngagementQuestions();
           }
-        }, 5000);
-      }
-    })();
+        }
+      }, 5000);
+    }
+  });
 
+  onMount(() => {
     // Set original title early
     if (typeof document !== "undefined") {
       originalTitle = document.title;
@@ -324,28 +325,23 @@
       }
 
       try {
-        const response = await fetch(
-          `/api/chat/receive?sessionId=${sessionId}`,
-        );
-        if (response.ok) {
-          const data = await response.json();
-          if (data.messages && data.messages.length > 0) {
-            isWaitingForAgent = false;
+        const data = await GET(`/api/chat/receive`);
+        if (data && data.length > 0) {
+          isWaitingForAgent = false;
 
-            let hasNew = false;
-            for (const msg of data.messages) {
-              messages.push({
-                id: `agent-${Date.now()}-${Math.random()}`,
-                text: msg.text,
-                sender: "agent",
-                timestamp: new Date(msg.timestamp),
-              });
-              hasNew = true;
-            }
+          let hasNew = false;
+          for (const msg of data) {
+            messages.push({
+              id: `agent-${Date.now()}-${Math.random()}`,
+              text: msg.message,
+              sender: "agent",
+              timestamp: new Date(msg.createdAt),
+            });
+            hasNew = true;
+          }
 
-            if (hasNew) {
-              notifyVisitor();
-            }
+          if (hasNew) {
+            notifyVisitor();
           }
         }
       } catch (e) {
