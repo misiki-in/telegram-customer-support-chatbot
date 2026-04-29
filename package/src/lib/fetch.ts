@@ -12,6 +12,21 @@ function getSessionId() {
   return uuid
 }
 
+export async function GET(path: string) {
+  const url = new URL(`${ENDPOINT}${path}`)
+  const res = await fetch(url, {
+    headers: {
+      "x-key": KEY,
+      "x-session-id": sessionId,
+    },
+  })
+
+  const resBody = await res.json()
+  if (!res.ok)
+    throw resBody
+  return resBody
+}
+
 export async function POST(path: string, body: Record<string, any>) {
 
   const url = new URL(`${ENDPOINT}${path}`)

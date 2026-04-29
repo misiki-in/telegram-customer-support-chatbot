@@ -19,6 +19,11 @@ router.post('/send', async (c) => {
     sendError('Project not found', 404)
 
   const formatted = formatChatMessage(body, sessionId)
+  await factory.chat.create({
+    ...body,
+    projectId,
+    sessionId,
+  })
   await sendMessage(
     project.botToken || env.DEFAULT_BOT_TOKEN,
     project.chatId,
@@ -43,6 +48,14 @@ router.post('/email', async (c) => {
     formatted
   )
   return c.json({ success: true }, 200)
+})
+
+router.get('/history', async (c) => {
+  const projectId = getProjectId(c)
+  const sessionId = getSessionId(c)
+
+  const messages = await factory.chat.listBySessionId(sessionId)
+  return c.json(messages, 200)
 })
 
 router.post('/receive', async (c) => {

@@ -10,7 +10,7 @@
   } from "@lucide/svelte";
   import { onMount, tick } from "svelte";
   import { fade, fly, slide } from "svelte/transition";
-  import { POST } from "./lib/fetch";
+  import { GET, POST } from "./lib/fetch";
 
   type Message = {
     id: string;
@@ -113,19 +113,13 @@
 
       // 1. Fetch chat history
       try {
-        const res = await fetch(`/api/chat/history?sessionId=${sessionId}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.messages && data.messages.length > 0) {
-            // Map history to our Message type
-            messages = data.messages.map((m: any) => ({
-              id: `history-${Math.random()}`,
-              text: m.text,
-              sender: m.sender,
-              timestamp: new Date(m.timestamp),
-            }));
-          }
-        }
+        const data = await GET(`/api/chat/history`);
+        messages = data.map((m: any) => ({
+          id: `history-${Math.random()}`,
+          text: m.message,
+          sender: m.isSystem ? "agent": "user",
+          timestamp: new Date(m.createdAt),
+        }));
       } catch (e) {
         console.error("Failed to fetch chat history", e);
       }
@@ -314,8 +308,7 @@
           isSystem: true,
           metadata: await getMetadata(),
         }),
-        
-        startPolling();
+          startPolling();
       }, 800);
     }
   };
