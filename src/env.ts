@@ -7,6 +7,7 @@ const env = {
   PORT: Number(process.env.PORT),
   DATABASE_URL: String(process.env.DATABASE_URL),
   JWT_SECRET: String(process.env.JWT_SECRET),
+  DEFAULT_BOT_TOKEN: String(process.env.DEFAULT_BOT_TOKEN),
 };
 
 for (const key of Object.keys(env)) {

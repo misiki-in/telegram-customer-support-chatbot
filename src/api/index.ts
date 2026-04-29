@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import authRouter from './auth';
 import projectRouter from './projects'
 import adminRouter from './admin'
+import chatRouter from './chat'
 
 import { handleError } from "@/utils";
 
@@ -23,6 +24,7 @@ app.get("/health", (c) => c.text("Surviving Bro!"));
   
 app.route("/api/auth", authRouter);
 app.route("/api/project", projectRouter);
+app.route("/api/chat", chatRouter)
 app.route("/api/admin", adminRouter);
 
 export default app;

@@ -34,6 +34,7 @@ router.post('/', async (c) => {
   const project = await factory.project.create({
     ownerId: user.id,
     name: body.name,
+    chatId: body.chatId,
   })
 
   return c.json({ id: project.id }, 200)

@@ -5,11 +5,12 @@
     Send,
     Bot,
     User,
-    Loader2,
     Rocket,
+    Loader2,
   } from "@lucide/svelte";
   import { onMount, tick } from "svelte";
   import { fade, fly, slide } from "svelte/transition";
+  import { POST } from "./lib/fetch";
 
   type Message = {
     id: string;
@@ -77,7 +78,10 @@
       }
 
       if (chatTrigger.prefilledMessage) {
-        console.log("Applying prefilled message:", chatTrigger.prefilledMessage);
+        console.log(
+          "Applying prefilled message:",
+          chatTrigger.prefilledMessage,
+        );
         message = chatTrigger.prefilledMessage;
 
         const capturedMessage = chatTrigger.prefilledMessage;
@@ -161,7 +165,10 @@
       return () => {
         if (engagementTimer) clearTimeout(engagementTimer);
         if (titleInterval) clearInterval(titleInterval);
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
       };
     }
   });
@@ -226,18 +233,21 @@
   async function getMetadata() {
     let country = "Unknown";
     let city = "Unknown";
+    let ip = "";
     try {
       const geoRes = await fetch("https://ipapi.co/json/");
       if (geoRes.ok) {
         const geoData = await geoRes.json();
         country = geoData.country_name || "Unknown";
         city = geoData.city || "Unknown";
+        ip = geoData.ip || ""
       }
     } catch (e) {}
 
     return {
       country,
       city,
+      ip,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       url: window.location.href,
       referrer: document.referrer || "Direct",
@@ -261,7 +271,7 @@
 
   const handleOptionClick = async (optionText: string, messageId: string) => {
     // Remove options from the clicked message
-    const msgIndex = messages.findIndex(m => m.id === messageId);
+    const msgIndex = messages.findIndex((m) => m.id === messageId);
     if (msgIndex !== -1) {
       messages[msgIndex] = { ...messages[msgIndex], options: undefined };
     }
@@ -333,7 +343,7 @@
           const data = await response.json();
           if (data.messages && data.messages.length > 0) {
             isWaitingForAgent = false;
-            
+
             let hasNew = false;
             for (const msg of data.messages) {
               messages.push({
@@ -397,15 +407,10 @@
     }
 
     try {
-      fetch("/api/chat/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: userMsg,
-          isSystem: false,
-          sessionId: sessionId,
-          metadata: await getMetadata(),
-        }),
+      await POST("/api/chat/send", {
+        message: userMsg,
+        isSystem: false,
+        metadata: await getMetadata(),
       });
 
       startPolling();
@@ -453,28 +458,19 @@
   };
 </script>
 
-<div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+<div class="chat-container">
   <!-- Chat Window -->
   {#if isOpen}
-    <div
-      transition:fade={{ duration: 200 }}
-      class="mb-4 flex h-[480px] w-[350px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-zinc-200 dark:bg-zinc-950 dark:ring-zinc-800 sm:w-[400px]"
-    >
+    <div transition:fade={{ duration: 200 }} class="chat-window">
       <!-- Header -->
-      <div
-        class="flex items-center justify-between bg-zinc-900 px-5 py-4 text-white dark:bg-white dark:text-zinc-900"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500/20"
-          >
-            <Bot class="h-6 w-6 text-primary-400 dark:text-primary-600" />
+      <div class="chat-header">
+        <div class="header-info">
+          <div class="bot-icon-container">
+            <Bot class="bot-icon-large" />
           </div>
           <div>
-            <h3 class="font-semibold leading-none">Litekart Agent</h3>
-            <p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              We typically reply in minutes
-            </p>
+            <h3 class="header-title">Litekart Agent</h3>
+            <p class="header-subtitle">We typically reply in minutes</p>
           </div>
         </div>
         <button
@@ -482,63 +478,53 @@
             isOpen = false;
             localStorage.setItem("chat_manually_closed", "true");
           }}
-          class="rounded-full p-2 transition-colors hover:bg-white/10 dark:hover:bg-black/10 text-zinc-400 hover:text-white dark:text-zinc-500 dark:hover:text-black"
+          class="close-button"
           aria-label="Close chat"
         >
-          <X class="h-5 w-5" />
+          <X class="close-icon" />
         </button>
       </div>
 
       <!-- Messages -->
-      <div
-        bind:this={chatBox}
-        class="flex-1 overflow-y-auto p-5 space-y-4 bg-zinc-50/50 dark:bg-zinc-900/10"
-      >
+      <div bind:this={chatBox} class="messages-container">
         {#each messages as msg (msg.id)}
           {#if msg.sender === "system"}
             <div
-              class="flex justify-center my-4"
+              class="system-message-wrapper"
               transition:fly={{ y: 10, duration: 200 }}
             >
-              <div
-                class="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs px-3 py-2 rounded-lg text-center shadow-inner max-w-[85%]"
-              >
+              <div class="system-message">
                 {msg.text}
               </div>
             </div>
           {:else}
             <div
-              class="flex {msg.sender === 'user'
-                ? 'justify-end'
-                : 'justify-start'}"
+              class="message-row {msg.sender === 'user'
+                ? 'user-row'
+                : 'agent-row'}"
               transition:fly={{ y: 10, duration: 200 }}
             >
               {#if msg.sender === "agent"}
-                <div
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 mr-2 self-end"
-                >
-                  <Bot class="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                <div class="message-bot-icon-container">
+                  <Bot class="bot-icon-small" />
                 </div>
               {/if}
 
               <div
-                class="max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm {msg.sender ===
-                'user'
-                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-br-none'
-                  : 'bg-white border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-bl-none'}"
+                class="message-bubble {msg.sender === 'user'
+                  ? 'user-bubble'
+                  : 'agent-bubble'}"
               >
-                <p
-                  class="text-sm leading-relaxed whitespace-pre-wrap font-medium"
-                >
+                <p class="message-text">
                   {msg.text}
                 </p>
 
                 {#if msg.options}
-                  <div class="mt-3 flex flex-col gap-2">
+                  <div class="message-options">
                     {#each msg.options as option}
                       <button
                         onclick={() => handleOptionClick(option, msg.id)}
-                        class="w-full text-left bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-sm py-2 px-3 rounded-xl transition-colors border border-zinc-200 dark:border-zinc-700 font-semibold text-zinc-800 dark:text-zinc-200"
+                        class="option-button"
                       >
                         {option}
                       </button>
@@ -547,8 +533,7 @@
                 {/if}
 
                 <span
-                  class="mt-1 block text-[10px] opacity-50 {msg.sender ===
-                  'user'
+                  class="message-timestamp {msg.sender === 'user'
                     ? 'text-right'
                     : 'text-left'}"
                 >
@@ -560,10 +545,8 @@
               </div>
 
               {#if msg.sender === "user"}
-                <div
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800 ml-2 self-end"
-                >
-                  <User class="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                <div class="message-user-icon-container">
+                  <User class="user-icon-small" />
                 </div>
               {/if}
             </div>
@@ -571,46 +554,29 @@
         {/each}
 
         {#if isWaitingForAgent && !showEmailForm}
-          <div class="flex justify-start" transition:fade>
-            <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 mr-2 self-end"
-            >
-              <Bot class="h-4 w-4 text-primary-600 dark:text-primary-400" />
+          <div class="typing-indicator-wrapper" transition:fade>
+            <div class="message-bot-icon-container">
+              <Bot class="bot-icon-small" />
             </div>
-            <div
-              class="bg-white border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm flex gap-1 items-center"
-            >
-              <span class="w-2 h-2 rounded-full bg-zinc-400 animate-bounce"
-              ></span>
-              <span
-                class="w-2 h-2 rounded-full bg-zinc-400 animate-bounce"
-                style="animation-delay: 0.2s"
-              ></span>
-              <span
-                class="w-2 h-2 rounded-full bg-zinc-400 animate-bounce"
-                style="animation-delay: 0.4s"
-              ></span>
+            <div class="typing-bubble">
+              <span class="dot"></span>
+              <span class="dot" style="animation-delay: 0.2s"></span>
+              <span class="dot" style="animation-delay: 0.4s"></span>
             </div>
           </div>
         {/if}
 
         {#if showEmailForm}
-          <div
-            class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm mt-4"
-            transition:slide
-          >
-            <label
-              for="fallback-email"
-              class="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2"
-              >Email Address</label
+          <div class="email-form-container" transition:slide>
+            <label for="fallback-email" class="email-label">Email Address</label
             >
-            <div class="flex gap-2">
+            <div class="email-input-group">
               <input
                 id="fallback-email"
                 type="email"
                 bind:value={userEmail}
                 placeholder="you@example.com"
-                class="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:text-white"
+                class="email-input"
                 onkeydown={(e) => {
                   if (e.key === "Enter") submitEmail();
                 }}
@@ -618,12 +584,12 @@
               <button
                 onclick={submitEmail}
                 disabled={isSubmittingEmail || !userEmail.includes("@")}
-                class="flex shrink-0 items-center justify-center rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-4 py-2 font-medium disabled:opacity-50 transition-transform active:scale-95 hover:bg-zinc-800 dark:hover:bg-zinc-200"
+                class="email-submit-button"
               >
                 {#if isSubmittingEmail}
-                  <Loader2 class="h-4 w-4 animate-spin" />
+                  <Loader2 class="spinner-icon" />
                 {:else}
-                  <Rocket class="h-4 w-4" />
+                  <Rocket class="rocket-icon" />
                 {/if}
               </button>
             </div>
@@ -632,15 +598,8 @@
       </div>
 
       <!-- Input Area -->
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        class="border-t border-zinc-100 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
-        onclick={clearNotification}
-      >
-        <div
-          class="relative flex items-end overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 focus-within:ring-2 focus-within:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:focus-within:ring-white/20"
-        >
+      <div class="input-area" onclick={clearNotification}>
+        <div class="input-wrapper">
           <textarea
             bind:this={messageInput}
             bind:value={message}
@@ -648,22 +607,19 @@
             onfocus={clearNotification}
             placeholder="Type a message..."
             rows="1"
-            class="max-h-[120px] min-h-[44px] w-full resize-none bg-transparent py-3 pl-4 pr-12 text-sm outline-none dark:text-white dark:placeholder:text-zinc-500"
+            class="message-textarea"
           ></textarea>
           <button
             onclick={sendMessage}
             disabled={!message.trim()}
-            class="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-white transition-all disabled:opacity-50 disabled:bg-zinc-300 dark:bg-white dark:text-zinc-900 dark:disabled:bg-zinc-700 hover:scale-105 active:scale-95"
+            class="send-button"
             aria-label="Send message"
           >
-            <Send class="h-4 w-4" />
+            <Send class="send-icon" />
           </button>
         </div>
-        <div class="mt-2 text-center">
-          <span
-            class="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium tracking-wide uppercase"
-            >Powered by Litekart AI</span
-          >
+        <div class="powered-by">
+          <span>Powered by Litekart AI</span>
         </div>
       </div>
     </div>
@@ -679,15 +635,701 @@
         startPolling();
       }
     }}
-    class="group flex h-14 w-14 items-center justify-center rounded-full bg-zinc-900 shadow-xl ring-4 ring-zinc-900/20 transition-all hover:scale-105 active:scale-95 dark:bg-white dark:ring-white/20"
+    class="floating-toggle-button"
     aria-label="Toggle chat"
   >
     {#if isOpen}
-      <X
-        class="h-6 w-6 text-white dark:text-zinc-900 transition-transform duration-300 group-hover:rotate-90"
-      />
+      <X class="toggle-icon {isOpen ? 'rotated' : ''}" />
     {:else}
-      <MessageSquare class="h-6 w-6 text-white dark:text-zinc-900" />
+      <MessageSquare class="toggle-icon" />
     {/if}
   </button>
 </div>
+
+<style>
+  :root {
+    --primary-400: #60a5fa;
+    --primary-500: #3b82f6;
+    --primary-600: #2563eb;
+    --primary-900: #1e3a8a;
+    --zinc-50: #fafafa;
+    --zinc-100: #f4f4f5;
+    --zinc-200: #e4e4e7;
+    --zinc-300: #d4d4d8;
+    --zinc-400: #a1a1aa;
+    --zinc-500: #71717a;
+    --zinc-600: #52525b;
+    --zinc-700: #3f3f46;
+    --zinc-800: #27272a;
+    --zinc-900: #18181b;
+    --zinc-950: #09090b;
+    --white: #ffffff;
+    --black: #000000;
+  }
+
+  .chat-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: inherit;
+  }
+
+  .chat-window {
+    margin-bottom: 1rem;
+    display: flex;
+    height: 480px;
+    width: 350px;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1rem;
+    background-color: var(--white);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--zinc-200);
+  }
+
+  @media (min-width: 640px) {
+    .chat-window {
+      width: 400px;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .chat-window {
+      background-color: var(--zinc-950);
+      border-color: var(--zinc-800);
+    }
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--zinc-900);
+    padding: 1rem 1.25rem;
+    color: var(--white);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .chat-header {
+      background-color: var(--white);
+      color: var(--zinc-900);
+    }
+  }
+
+  .header-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .bot-icon-container {
+    display: flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+
+  :global(.bot-icon-large) {
+    height: 1.5rem !important;
+    width: 1.5rem !important;
+    color: var(--primary-400) !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(.bot-icon-large) {
+      color: var(--primary-600) !important;
+    }
+  }
+
+  .header-title {
+    font-weight: 600;
+    line-height: 1;
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .header-subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--zinc-400);
+    margin-bottom: 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .header-subtitle {
+      color: var(--zinc-500);
+    }
+  }
+
+  .close-button {
+    border-radius: 9999px;
+    padding: 0.5rem;
+    transition: background-color 0.2s;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--zinc-400);
+  }
+
+  .close-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .close-button {
+      color: var(--zinc-500);
+    }
+    .close-button:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+      color: var(--black);
+    }
+  }
+
+  :global(.close-icon) {
+    height: 1.25rem !important;
+    width: 1.25rem !important;
+  }
+
+  .messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background-color: rgba(244, 244, 245, 0.5);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .messages-container {
+      background-color: rgba(24, 24, 27, 0.1);
+    }
+  }
+
+  .system-message-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+
+  .system-message {
+    background-color: var(--zinc-100);
+    color: var(--zinc-600);
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    max-width: 85%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .system-message {
+      background-color: var(--zinc-800);
+      color: var(--zinc-300);
+    }
+  }
+
+  .message-row {
+    display: flex;
+  }
+
+  .user-row {
+    justify-content: flex-end;
+  }
+
+  .agent-row {
+    justify-content: flex-start;
+  }
+
+  .message-bot-icon-container {
+    display: flex;
+    height: 2rem;
+    width: 2rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--zinc-100);
+    margin-right: 0.5rem;
+    align-self: flex-end;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .message-bot-icon-container {
+      background-color: rgba(30, 58, 138, 0.3);
+    }
+  }
+
+  :global(.bot-icon-small) {
+    height: 1rem !important;
+    width: 1rem !important;
+    color: var(--primary-600) !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(.bot-icon-small) {
+      color: var(--primary-400) !important;
+    }
+  }
+
+  .message-bubble {
+    max-width: 80%;
+    border-radius: 1rem;
+    padding: 0.625rem 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .user-bubble {
+    background-color: var(--zinc-900);
+    color: var(--white);
+    border-bottom-right-radius: 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .user-bubble {
+      background-color: var(--white);
+      color: var(--zinc-900);
+    }
+  }
+
+  .agent-bubble {
+    background-color: var(--white);
+    border: 1px solid var(--zinc-100);
+    color: var(--zinc-800);
+    border-bottom-left-radius: 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .agent-bubble {
+      background-color: var(--zinc-900);
+      border-color: var(--zinc-800);
+      color: var(--zinc-100);
+    }
+  }
+
+  .message-text {
+    font-size: 0.875rem;
+    line-height: 1.625;
+    white-space: pre-wrap;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .message-options {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .option-button {
+    width: 100%;
+    text-align: left;
+    background-color: var(--zinc-50);
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s;
+    border: 1px solid var(--zinc-200);
+    font-weight: 600;
+    color: var(--zinc-800);
+    cursor: pointer;
+  }
+
+  .option-button:hover {
+    background-color: var(--zinc-100);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .option-button {
+      background-color: var(--zinc-800);
+      border-color: var(--zinc-700);
+      color: var(--zinc-200);
+    }
+    .option-button:hover {
+      background-color: var(--zinc-700);
+    }
+  }
+
+  .message-timestamp {
+    margin-top: 0.25rem;
+    display: block;
+    font-size: 0.625rem;
+    opacity: 0.5;
+  }
+
+  .text-right {
+    text-align: right;
+  }
+  .text-left {
+    text-align: left;
+  }
+
+  .message-user-icon-container {
+    display: flex;
+    height: 2rem;
+    width: 2rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--zinc-200);
+    margin-left: 0.5rem;
+    align-self: flex-end;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .message-user-icon-container {
+      background-color: var(--zinc-800);
+    }
+  }
+
+  :global(.user-icon-small) {
+    height: 1rem !important;
+    width: 1rem !important;
+    color: var(--zinc-600) !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(.user-icon-small) {
+      color: var(--zinc-400) !important;
+    }
+  }
+
+  .typing-indicator-wrapper {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .typing-bubble {
+    background-color: var(--white);
+    border: 1px solid var(--zinc-100);
+    border-radius: 1rem;
+    border-bottom-left-radius: 0;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .typing-bubble {
+      background-color: var(--zinc-900);
+      border-color: var(--zinc-800);
+    }
+  }
+
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--zinc-400);
+    animation: bounce 1s infinite ease-in-out;
+  }
+
+  @keyframes bounce {
+    0%,
+    80%,
+    100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+
+  .email-form-container {
+    background-color: var(--white);
+    border: 1px solid var(--zinc-200);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    margin-top: 1rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .email-form-container {
+      background-color: var(--zinc-900);
+      border-color: var(--zinc-800);
+    }
+  }
+
+  .email-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--zinc-700);
+    margin-bottom: 0.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .email-label {
+      color: var(--zinc-300);
+    }
+  }
+
+  .email-input-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .email-input {
+    flex: 1;
+    border-radius: 0.5rem;
+    border: 1px solid var(--zinc-300);
+    background-color: transparent;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .email-input:focus {
+    border-color: var(--zinc-500);
+    box-shadow: 0 0 0 1px var(--zinc-500);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .email-input {
+      border-color: var(--zinc-700);
+      color: var(--white);
+    }
+    .email-input:focus {
+      border-color: var(--zinc-500);
+    }
+  }
+
+  .email-submit-button {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background-color: var(--zinc-900);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  .email-submit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .email-submit-button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .email-submit-button:hover:not(:disabled) {
+    background-color: var(--zinc-800);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .email-submit-button {
+      background-color: var(--white);
+      color: var(--zinc-900);
+    }
+    .email-submit-button:hover:not(:disabled) {
+      background-color: var(--zinc-200);
+    }
+  }
+
+  :global(.spinner-icon) {
+    height: 1rem !important;
+    width: 1rem !important;
+    animation: spin 1s linear infinite !important;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  :global(.rocket-icon) {
+    height: 1rem !important;
+    width: 1rem !important;
+  }
+
+  .input-area {
+    border-top: 1px solid var(--zinc-100);
+    background-color: var(--white);
+    padding: 1rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .input-area {
+      border-color: var(--zinc-800);
+      background-color: var(--zinc-950);
+    }
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid var(--zinc-200);
+    background-color: var(--zinc-50);
+    transition: box-shadow 0.2s;
+  }
+
+  .input-wrapper:focus-within {
+    box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .input-wrapper {
+      border-color: var(--zinc-700);
+      background-color: var(--zinc-900);
+    }
+    .input-wrapper:focus-within {
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .message-textarea {
+    max-height: 120px;
+    min-height: 44px;
+    width: 100%;
+    resize: none;
+    background: transparent;
+    padding: 0.75rem 3rem 0.75rem 1rem;
+    font-size: 0.875rem;
+    outline: none;
+    border: none;
+    line-height: inherit;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .message-textarea {
+      color: var(--white);
+    }
+    .message-textarea::placeholder {
+      color: var(--zinc-500);
+    }
+  }
+
+  .send-button {
+    position: absolute;
+    bottom: 0.25rem;
+    right: 0.25rem;
+    display: flex;
+    height: 2.25rem;
+    width: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background-color: var(--zinc-900);
+    color: var(--white);
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .send-button:disabled {
+    opacity: 0.5;
+    background-color: var(--zinc-300);
+    cursor: not-allowed;
+  }
+
+  .send-button:hover:not(:disabled) {
+    transform: scale(1.05);
+  }
+
+  .send-button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .send-button {
+      background-color: var(--white);
+      color: var(--zinc-900);
+    }
+    .send-button:disabled {
+      background-color: var(--zinc-700);
+    }
+  }
+
+  :global(.send-icon) {
+    height: 1rem !important;
+    width: 1rem !important;
+  }
+
+  .powered-by {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.625rem;
+    color: var(--zinc-400);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .powered-by {
+      color: var(--zinc-500);
+    }
+  }
+
+  .floating-toggle-button {
+    display: flex;
+    height: 3.5rem;
+    width: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--zinc-900);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 4px solid rgba(24, 24, 27, 0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+    color: var(--white);
+  }
+
+  .floating-toggle-button:hover {
+    transform: scale(1.05);
+  }
+
+  .floating-toggle-button:active {
+    transform: scale(0.95);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .floating-toggle-button {
+      background-color: var(--white);
+      color: var(--zinc-900);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  :global(.toggle-icon) {
+    height: 1.5rem !important;
+    width: 1.5rem !important;
+    transition: transform 0.3s !important;
+  }
+
+  :global(.rotated) {
+    transform: rotate(90deg) !important;
+  }
+</style>

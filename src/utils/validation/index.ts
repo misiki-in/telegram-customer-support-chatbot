@@ -17,6 +17,7 @@ export const signupSchema = z.strictObject({
 
 export const projectCreationSchema = z.strictObject({
   name: z.string().min(1, "Name is required"),
+  chatId: z.string().min(1, "Chat ID is required"),
 })
 
 export const userUpgradeSchema = z.strictObject({
@@ -25,8 +26,16 @@ export const userUpgradeSchema = z.strictObject({
 
 export const projectUpdationSchema = z.strictObject({
   name: z.string().min(1, "Name is required").optional(),
+  chatId: z.string().min(1, "Chat ID is required").optional(),
 })
 
 export const storeUpdateSchema = z.strictObject({
   intervalTag: z.string().min(1, "Interval Tag is required")
+})
+
+export const sendSchema = z.strictObject({
+  message: z.string().min(1, "Message is required"),
+  metadata: z.record(z.string(), z.any()),
+  ip: z.string().optional(),
+  isSystem: z.boolean().nonoptional(),
 })

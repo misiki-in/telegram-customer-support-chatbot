@@ -17,9 +17,8 @@ export const Project = pgTable(
       .notNull()
       .references(() => User.id),
     name: varchar('name').notNull(),
-    isActive: boolean('is_active').default(true).notNull(),
-    isFacetsDisabled: boolean('is_facets_disabled').default(false).notNull(),
-    isSyncIntervalDisabled: boolean('is_sync_interval_disabled').default(false).notNull(),
+    chatId: varchar('chat_id').notNull(),
+    botToken: varchar('bot_token'),
     lastSyncedAt: timestamp('last_synced_at').defaultNow().notNull(),
 		...timestamps
 	},

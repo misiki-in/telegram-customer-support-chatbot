@@ -1,26 +1,21 @@
 import { Context } from "hono";
 import { sendError } from "./api-error";
-import { factory } from "@/db";
 
 export * from "./api-error";
 export * from "./fetch";
 export * from './session-cookie'
 export * from './get-from-session'
 export * from './cache'
+export * from "./format"
 
-export function getStoreDomain(c: Context) {
-  const domain = c.req.header("x-site-domain");
-  if (!domain) sendError("x-site-domain header missing", 400);
-  return domain;
+export function getProjectId(c: Context) {
+  const key = c.req.header("x-key");
+  if (!key) sendError("x-key header missing", 400);
+  return key;
 }
 
-export async function getProjectFromDomain(domain: string): Promise<string> {
-  const projectId = await factory.domain.getProjectId(domain)
-  if (!projectId)
-    sendError('No associtated project id', 422)
-  return projectId
-}
-
-export async function getProjectId(c: Context): Promise<string> {
-  return getProjectFromDomain(getStoreDomain(c))
+export function getSessionId(c: Context) {
+  const key = c.req.header("x-session-id");
+  if (!key) sendError("x-session-id header missing", 400);
+  return key;
 }
