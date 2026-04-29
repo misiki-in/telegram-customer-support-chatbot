@@ -15,8 +15,6 @@ export async function sendMessage(botToken: string, chatId: string, message: str
     })
 
     const body = await res.json()
-    console.log(body)
-
     if (!res.ok)
       return false
 

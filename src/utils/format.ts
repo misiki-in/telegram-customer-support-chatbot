@@ -1,9 +1,10 @@
-import { sendSchema } from '@/utils/validation'
+import { chatEmailSchema, sendSchema } from '@/utils/validation'
 import { z } from 'zod';
 
 type MessageBody = z.infer<typeof sendSchema>
+type EmailBody = z.infer<typeof chatEmailSchema>
 
-export function formatMessage(body: MessageBody, sessionId: string) {
+export function formatChatMessage(body: MessageBody, sessionId: string) {
   let visitorInfo = '';
   if (body.metadata) {
     const loc = [body.metadata.city, body.metadata.country].filter(Boolean).join(', ');
@@ -20,4 +21,8 @@ export function formatMessage(body: MessageBody, sessionId: string) {
     : `🧑 <b>User Message</b>\nIP: <code>${body.ip}</code>\nSession: <code>${sessionId || 'No Session'}</code>`;
 
   return `${prefix}${visitorInfo ? `\n\n<b>Visitor Context:</b>${visitorInfo}` : ''}\n\n<b>Message:</b>\n${body.message}`;
+}
+
+export function formatChatEmail(body: EmailBody, sessionId: string) {
+  return `🚨 *NEW LEAD CAPTURED* 🚨\n\nUser left their email because you were busy:\n\n✉️ Email: ${body.email}`;
 }

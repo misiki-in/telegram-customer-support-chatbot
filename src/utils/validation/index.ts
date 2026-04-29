@@ -39,3 +39,7 @@ export const sendSchema = z.strictObject({
   ip: z.string().optional(),
   isSystem: z.boolean().nonoptional(),
 })
+
+export const chatEmailSchema = z.strictObject({
+  email: z.email().nonoptional(),
+})

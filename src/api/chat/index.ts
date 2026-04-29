@@ -2,9 +2,9 @@ import { factory } from "@/db";
 import env from "@/env";
 import { populateAuth } from "@/middlware";
 import { HonoApp } from "@/types";
-import { formatMessage, getProjectId, getSessionId, sendError } from "@/utils";
+import { formatChatEmail, formatChatMessage, getProjectId, getSessionId, sendError } from "@/utils";
 import { sendMessage } from "@/utils/telegram";
-import { sendSchema } from "@/utils/validation";
+import { chatEmailSchema, sendSchema } from "@/utils/validation";
 import { Hono } from "hono";
 
 const router = new Hono<HonoApp>();
@@ -18,7 +18,25 @@ router.post('/send', async (c) => {
   if (!project)
     sendError('Project not found', 404)
 
-  const formatted = formatMessage(body, sessionId)
+  const formatted = formatChatMessage(body, sessionId)
+  await sendMessage(
+    project.botToken || env.DEFAULT_BOT_TOKEN,
+    project.chatId,
+    formatted
+  )
+  return c.json({ success: true }, 200)
+})
+
+router.post('/email', async (c) => {
+  const projectId = getProjectId(c)
+  const sessionId = getSessionId(c)
+  const body = chatEmailSchema.parse(await c.req.json())
+
+  const project = await factory.project.getOne(projectId)
+  if (!project)
+    sendError('Project not found', 404)
+
+  const formatted = formatChatEmail(body, sessionId)
   await sendMessage(
     project.botToken || env.DEFAULT_BOT_TOKEN,
     project.chatId,

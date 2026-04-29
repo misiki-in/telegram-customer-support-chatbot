@@ -240,7 +240,7 @@
         const geoData = await geoRes.json();
         country = geoData.country_name || "Unknown";
         city = geoData.city || "Unknown";
-        ip = geoData.ip || ""
+        ip = geoData.ip || "";
       }
     } catch (e) {}
 
@@ -309,17 +309,12 @@
         });
 
         // Send notification to Telegram silently
-        fetch("/api/chat/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text: `[Visitor Poll] Business: ${localStorage.getItem("chat_business_type")}, Revenue: ${optionText}`,
-            isSystem: true,
-            sessionId: sessionId,
-            metadata: await getMetadata(),
-          }),
-        }).catch((e) => console.error(e));
-
+        POST("/api/chat/send", {
+          message: `[Visitor Poll] Business: ${localStorage.getItem("chat_business_type")}, Revenue: ${optionText}`,
+          isSystem: true,
+          metadata: await getMetadata(),
+        }),
+        
         startPolling();
       }, 800);
     }
@@ -425,14 +420,18 @@
     localStorage.setItem("chat_user_email", userEmail);
 
     try {
-      await fetch("/api/chat/email", {
+      await POST("/api/chat/email", {
+        email: userEmail,
+      });
+
+      /*await fetch("/api/chat/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: userEmail,
           sessionId: sessionId,
         }),
-      });
+      });*/
 
       showEmailForm = false;
       emailCaptured = true;
