@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@plugin 'flowbite/plugin';
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--color-primary-50: #f4f2ff;
+	--color-primary-100: #eae5ff;
+	--color-primary-200: #d5ccff;
+	--color-primary-300: #bfaaff;
+	--color-primary-400: #a482ff;
+	--color-primary-500: #873EFF;
+	--color-primary-600: #7425f3;
+	--color-primary-700: #5d1bc4;
+	--color-primary-800: #4d17a3;
+	--color-primary-900: #411685;
+	--color-primary-950: #260c5c;
+
+	--color-on-primary-fixed-variant: #260c5c;
+	--color-on-surface: #131b2e;
+	--color-inverse-primary: #d5ccff;
+	--color-on-background: #131b2e;
+	--color-on-secondary-container: #007073;
+	--color-primary-fixed-dim: #d5ccff;
+	--color-surface-container-lowest: #ffffff;
+	--color-tertiary-fixed-dim: #c0c1ff;
+	--color-error-container: #ffdad6;
+	--color-on-error-container: #93000a;
+	--color-tertiary-fixed: #e1e0ff;
+	--color-outline: #737688;
+	--color-surface-tint: #873EFF;
+	--color-on-secondary-fixed: #002021;
+	--color-on-secondary: #ffffff;
+	--color-surface-container-low: #f2f3ff;
+	--color-error: #ba1a1a;
+	--color-inverse-on-surface: #eef0ff;
+	--color-background: #faf8ff;
+	--color-tertiary: #3a3ac8;
+	--color-surface-dim: #d2d9f4;
+	--color-on-tertiary-container: #e8e6ff;
+	--color-outline-variant: #c3c5d9;
+	--color-surface: #faf8ff;
+	--color-on-tertiary-fixed-variant: #2f2ebe;
+	--color-on-secondary-fixed-variant: #004f52;
+	--color-tertiary-container: #5356e1;
+	--color-surface-variant: #dae2fd;
+	--color-surface-container-highest: #dae2fd;
+	--color-on-surface-variant: #434656;
+	--color-secondary-fixed-dim: #2bdbe1;
+	--color-secondary-fixed: #58f8fe;
+	--color-surface-container-high: #e2e7ff;
+	--color-on-primary: #ffffff;
+	--color-secondary: #00696c;
+	--color-secondary-container: #58f8fe;
+	--color-on-tertiary-fixed: #07006c;
+	--color-primary: #873EFF;
+	--color-surface-bright: #faf8ff;
+	--color-on-error: #ffffff;
+	--color-on-primary-fixed: #260c5c;
+	--color-surface-container: #eaedff;
+	--color-on-tertiary: #ffffff;
+	--color-primary-container: #873EFF;
+	--color-primary-fixed: #eae5ff;
+	--color-on-primary-container: #ffffff;
+	--color-inverse-surface: #283044;
+
+	--font-headline: 'Source Sans 3';
+	--font-body: 'Source Sans 3';
+	--font-label: 'Source Sans 3';
+
+	--radius-default: 0.125rem;
+	--radius-lg: 0.25rem;
+	--radius-xl: 0.5rem;
+	--radius-full: 0.75rem;
+}
+
+@source "../../node_modules/flowbite-svelte/dist";
+@source "../../node_modules/flowbite-svelte-icons/dist";
+
+.material-symbols-outlined {
+	font-variation-settings:
+		'FILL' 0,
+		'wght' 400,
+		'GRAD' 0,
+		'opsz' 24;
+}
+
+body {
+	font-family: var(--font-body), sans-serif;
+	overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-headline), sans-serif;
+}

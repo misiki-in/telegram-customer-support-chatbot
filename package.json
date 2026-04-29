@@ -1,0 +1,30 @@
+{
+  "name": "search",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun --target bun build --outfile dist/server.js --production src/index.ts",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.10"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "bunqueue": "^2.6.115",
+    "drizzle": "^1.4.0",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.8",
+    "node-cache": "^5.1.2",
+    "postgres": "^3.4.8",
+    "ulid": "^3.0.2",
+    "zod": "^4.3.6"
+  }
+}

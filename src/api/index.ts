@@ -1,0 +1,28 @@
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+
+import authRouter from './auth';
+import projectRouter from './projects'
+import adminRouter from './admin'
+
+import { handleError } from "@/utils";
+
+const app = new Hono();
+
+app.notFound((c) => c.text("Route not found"));
+app.onError(handleError)
+
+app.use(
+  "*",
+  cors({
+    origin: "*",
+  })
+);
+
+app.get("/health", (c) => c.text("Surviving Bro!"));
+  
+app.route("/api/auth", authRouter);
+app.route("/api/project", projectRouter);
+app.route("/api/admin", adminRouter);
+
+export default app;
