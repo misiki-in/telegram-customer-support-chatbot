@@ -22,9 +22,15 @@
 				</a>
 			{/each}
 		</div>
-		<div class="flex items-center gap-4">
+		<div class="flex items-center gap-6">
 			<a
-				href="/dash"
+				href="/login"
+				class="font-headline text-sm font-bold text-gray-600 transition-colors hover:text-black"
+			>
+				Login
+			</a>
+			<a
+				href="/register"
 				class="btn-primary group relative overflow-hidden rounded-full bg-black px-7 py-3 font-headline text-sm font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
 			>
 				<span class="relative z-10">Get Started</span>

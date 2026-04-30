@@ -17,8 +17,7 @@
 				<span class="font-headline text-2xl font-black tracking-tighter text-white">Telegram Chatbot</span>
 			</div>
 			<p class="mb-10 max-w-sm font-body text-base leading-relaxed text-white/60">
-				Attach faceted high performance search layer to WooCommerce stores. Built for high-volume
-				WooCommerce stores that demand millisecond performance.
+				Build and manage powerful customer support chatbots for Telegram. Scale your support with automation and seamless human handoff.
 			</p>
 		</div>
 
@@ -68,7 +67,7 @@
 	<div
 		class="relative z-10 mx-auto mt-20 flex max-w-7xl flex-col items-center justify-between gap-6 border-t border-white/5 px-6 pt-12 md:flex-row"
 	>
-		<p class="font-headline text-sm text-white/30">© 2026 Telegram Chatbot. Precision Search Engine.</p>
+		<p class="font-headline text-sm text-white/30">© 2026 Telegram Chatbot. Built for scale.</p>
 	</div>
 </footer>
 
