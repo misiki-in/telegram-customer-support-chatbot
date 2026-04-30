@@ -10,7 +10,6 @@ export class TelegramSupportBot {
   constructor(endpoint: string, apiKey: string, container: HTMLElement) {
     this.apiKey = apiKey
     this.endpoint = endpoint
-    console.log("called contstrouctor")
 
     try {
       untrack(() => {
@@ -37,6 +36,3 @@ export class TelegramSupportBot {
     return ele
   }
 }
-
-//const container = document.getElementById('container')
-//const bot = new TelegramSupportBot("http://localhost:7000", "xxx", container)

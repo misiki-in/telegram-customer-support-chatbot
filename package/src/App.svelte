@@ -106,7 +106,6 @@
   });
 
   onMount(async () => {
-    console.log("mounting App")
     // Initialize or retrieve sessionId
     sessionId = localStorage.getItem("chat_session_id") || "";
     if (!sessionId) {
