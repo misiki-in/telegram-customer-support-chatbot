@@ -56,8 +56,11 @@ async function syncMessageQueues() {
         })
       }
 
+      if (chats.length) {
+        await factory.chat.createMultiple(chats)
+      }
+
       console.log("Received", chats.length, "updates")
-      await factory.chat.createMultiple(chats)
       await factory.bot.update(bot.id, {
         lastSeenUpdateId: lastUpdateId,
       })
