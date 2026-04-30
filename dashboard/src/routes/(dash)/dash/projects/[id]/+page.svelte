@@ -153,7 +153,7 @@
 </script>
 
 <svelte:head>
-	<title>{project?.name || 'Project'} | AeroSearch</title>
+	<title>{project?.name || 'Project'} | Telegram Chatbot</title>
 </svelte:head>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -174,7 +174,7 @@
 
 			{#if loading}
 				<div class="flex justify-center items-center py-20">
-					<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+					<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
 				</div>
 			{:else if error}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -188,7 +188,7 @@
 							<Button
 								variant="ghost"
 								onclick={openNameModal}
-								class="rounded-full p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+								class="rounded-full p-2 text-gray-400 hover:text-black hover:bg-gray-100 transition-colors"
 								aria-label="Edit project name"
 							>
 								<Pencil class="h-5 w-5" />
@@ -324,7 +324,7 @@
 								required
 								disabled={updatingProject}
 								maxlength={100}
-								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
+								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-black focus:ring-black/20 disabled:bg-gray-50 transition-colors"
 							/>
 							<p class="mt-2 text-xs text-gray-500">{projectName.length}/100 characters</p>
 						</div>
@@ -341,7 +341,7 @@
 								required
 								disabled={updatingProject}
 								maxlength={100}
-								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
+								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-black focus:ring-black/20 disabled:bg-gray-50 transition-colors"
 							/>
 							<p class="mt-2 text-xs text-gray-500">{chatId.length}/100 characters</p>
 						</div>
@@ -426,7 +426,7 @@
 								bind:value={botToken}
 								required
 								disabled={updatingBotToken}
-								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
+								class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-black focus:ring-black/20 disabled:bg-gray-50 transition-colors"
 							/>
 						</div>
 					</div>

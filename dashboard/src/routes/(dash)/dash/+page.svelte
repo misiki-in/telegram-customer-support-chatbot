@@ -81,7 +81,7 @@
 
 		{#if loading}
 			<div class="flex justify-center items-center py-20">
-				<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+				<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
 			</div>
 		{:else if error}
 			<div class="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -157,7 +157,7 @@
 							required
 							disabled={creating}
 							maxlength={100}
-							class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
+							class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-black focus:ring-black/20 disabled:bg-gray-50 transition-colors"
 						/>
 						<p class="mt-2 text-xs text-gray-500">{projectName.length}/100 characters</p>
 					</div>
@@ -174,7 +174,7 @@
 							required
 							disabled={creating}
 							maxlength={100}
-							class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20 disabled:bg-gray-50 transition-colors"
+							class="rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-black focus:ring-black/20 disabled:bg-gray-50 transition-colors"
 						/>
 						<p class="mt-2 text-xs text-gray-500">{chatId.length}/100 characters</p>
 					</div>
