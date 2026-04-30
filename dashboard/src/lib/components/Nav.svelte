@@ -33,22 +33,23 @@
 			<div class="flex items-center gap-8">
 				<a
 					href="/"
-					class="flex items-center gap-2 text-gray-900 transition-colors hover:text-primary-600"
+					class="flex items-center gap-2 text-gray-900 transition-colors hover:text-black"
 				>
-					<img src="/logo.png" alt="AeroSearch Logo" class="h-12 w-12 object-contain" />
+				<span class="font-semibold text-lg">Telegram ChatBot</span>
+					<!-- <img src="/logo.png" alt="Telegram Chatbot Logo" class="h-12 w-12 object-contain" /> -->
 				</a>
 
 				<div class="hidden items-center gap-6 md:flex">
 					<a
 						href="/dash"
-						class="flex items-center gap-2 font-medium text-gray-600 transition-colors hover:text-primary-600 {page.url.pathname.startsWith('/dash') ? 'text-primary-600' : ''}"
+						class="flex items-center gap-2 font-medium text-gray-600 transition-colors hover:text-black {page.url.pathname.startsWith('/dash') ? 'text-black' : ''}"
 					>
 						<LayoutDashboard class="h-4 w-4" />
 						Projects
 					</a>
 					<a
 						href="/guide"
-						class="flex items-center gap-2 font-medium text-gray-600 transition-colors hover:text-primary-600 {page.url.pathname.startsWith('/guide') ? 'text-primary-600' : ''}"
+						class="flex items-center gap-2 font-medium text-gray-600 transition-colors hover:text-black {page.url.pathname.startsWith('/guide') ? 'text-black' : ''}"
 					>
 						<BookOpen class="h-4 w-4" />
 						Guides
@@ -102,14 +103,14 @@
 			<div class="space-y-2 px-4">
 				<a
 					href="/dash"
-					class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary-600 {page.url.pathname.startsWith('/dash') ? 'bg-primary-50 text-primary-600' : ''}"
+					class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-black {page.url.pathname.startsWith('/dash') ? 'bg-gray-100 text-black' : ''}"
 				>
 					<LayoutDashboard class="h-5 w-5" />
 					Projects
 				</a>
 				<a
 					href="/guide"
-					class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary-600 {page.url.pathname.startsWith('/guide') ? 'bg-primary-50 text-primary-600' : ''}"
+					class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-black {page.url.pathname.startsWith('/guide') ? 'bg-gray-100 text-black' : ''}"
 				>
 					<BookOpen class="h-5 w-5" />
 					Guides
@@ -129,7 +130,7 @@
 					<a
 						href={extensionDownloadLink}
 						download="extension.zip"
-						class="flex w-full items-center gap-3 rounded-xl bg-primary-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-primary-700"
+						class="flex w-full items-center gap-3 rounded-xl bg-black px-4 py-3 font-semibold text-white transition-colors hover:bg-gray-800"
 					>
 						<Download class="h-5 w-5" />
 						Download Extension

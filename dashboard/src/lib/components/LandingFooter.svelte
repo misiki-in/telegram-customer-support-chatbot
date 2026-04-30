@@ -1,20 +1,20 @@
 <footer class="relative mt-auto w-full overflow-hidden bg-on-surface dark:bg-on-surface/90 pt-24 pb-12 text-white transition-colors">
 	<!-- Decorative Background Element -->
 	<div
-		class="absolute top-0 right-0 h-[500px] w-[500px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]"
+		class="absolute top-0 right-0 h-[500px] w-[500px] translate-x-1/2 -translate-y-1/2 rounded-full bg-white/5 blur-[120px]"
 	></div>
 
 	<div class="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 md:grid-cols-12">
 		<div class="md:col-span-4">
 			<div class="mb-8 flex items-center gap-3">
-				<div class="rounded-xl bg-white/10 p-2 backdrop-blur-md">
+				<!-- <div class="rounded-xl bg-white/10 p-2 backdrop-blur-md">
 					<img
 						src="/logo-landscape.png"
-						alt="AeroSearch Logo"
+						alt="Telegram Chatbot Logo"
 						class="h-6 w-auto object-contain brightness-0 invert"
 					/>
-				</div>
-				<span class="font-headline text-2xl font-black tracking-tighter text-white">AeroSearch</span>
+				</div> -->
+				<span class="font-headline text-2xl font-black tracking-tighter text-white">Telegram Chatbot</span>
 			</div>
 			<p class="mb-10 max-w-sm font-body text-base leading-relaxed text-white/60">
 				Attach faceted high performance search layer to WooCommerce stores. Built for high-volume
@@ -68,7 +68,7 @@
 	<div
 		class="relative z-10 mx-auto mt-20 flex max-w-7xl flex-col items-center justify-between gap-6 border-t border-white/5 px-6 pt-12 md:flex-row"
 	>
-		<p class="font-headline text-sm text-white/30">© 2026 AeroSearch. Precision Search Engine.</p>
+		<p class="font-headline text-sm text-white/30">© 2026 Telegram Chatbot. Precision Search Engine.</p>
 	</div>
 </footer>
 
