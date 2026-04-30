@@ -4,14 +4,17 @@ import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [
+    svelte()
+  ],
   build: {
-    rolldownOptions: {
-      output: {
-        format: 'iife',
-        dir: resolve(__dirname, './dist'),
-        entryFileNames: 'main.js'
-      }
+    lib: {
+      entry: resolve(__dirname, 'src/main.ts'),
+      name: 'TelegramSupportBot',
+      fileName: 'main',
+      formats: ['es', 'umd']
+    },
+    rollupOptions: {
     }
   }
 })

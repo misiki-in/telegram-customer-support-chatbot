@@ -1,9 +1,8 @@
-import { mount } from 'svelte'
+import { mount, untrack } from 'svelte'
 import './app.css'
 import App from './App.svelte'
 
-
-class TelegramSupportBot {
+export class TelegramSupportBot {
   CONTAINER_ID = "telegram-support-bot"
   private apiKey: string
   private endpoint: string
@@ -11,10 +10,17 @@ class TelegramSupportBot {
   constructor(endpoint: string, apiKey: string, container: HTMLElement) {
     this.apiKey = apiKey
     this.endpoint = endpoint
+    console.log("called contstrouctor")
 
     try {
-      const app = mount(App, {
-        target: container,
+      untrack(() => {
+        mount(App, {
+          target: container,
+          props: {
+            apiKey: this.apiKey,
+            endpoint: this.endpoint
+          }
+        })
       })
     } catch (e: any) {
       console.error("Mount error", e)
@@ -32,5 +38,5 @@ class TelegramSupportBot {
   }
 }
 
-const container = document.getElementById('container')
-const bot = new TelegramSupportBot("http://localhost:7000", "xxx", container)
+//const container = document.getElementById('container')
+//const bot = new TelegramSupportBot("http://localhost:7000", "xxx", container)

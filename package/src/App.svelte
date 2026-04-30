@@ -20,6 +20,9 @@
     options?: string[];
   };
 
+  // Props
+  let { apiKey = "", endpoint = "" } = $props();
+
   // State using runes
   let isOpen = $state(false);
   let message = $state("");
@@ -103,6 +106,7 @@
   });
 
   onMount(async () => {
+    console.log("mounting App")
     // Initialize or retrieve sessionId
     sessionId = localStorage.getItem("chat_session_id") || "";
     if (!sessionId) {
@@ -112,7 +116,7 @@
 
     // 1. Fetch chat history
     try {
-      const data = await GET(`/api/chat/history`);
+      const data = await GET(`/api/chat/history`, endpoint, apiKey, sessionId);
       if (!data.length) return;
       messages = data.map((m: any) => ({
         id: `history-${Math.random()}`,
@@ -304,11 +308,17 @@
         });
 
         // Send notification to Telegram silently
-        POST("/api/chat/send", {
-          message: `[Visitor Poll] Business: ${localStorage.getItem("chat_business_type")}, Revenue: ${optionText}`,
-          isSystem: true,
-          metadata: await getMetadata(),
-        }),
+        POST(
+          "/api/chat/send",
+          {
+            message: `[Visitor Poll] Business: ${localStorage.getItem("chat_business_type")}, Revenue: ${optionText}`,
+            isSystem: true,
+            metadata: await getMetadata(),
+          },
+          endpoint,
+          apiKey,
+          sessionId,
+        ),
           startPolling();
       }, 800);
     }
@@ -325,7 +335,7 @@
       }
 
       try {
-        const data = await GET(`/api/chat/receive`);
+        const data = await GET(`/api/chat/receive`, endpoint, apiKey, sessionId);
         if (data && data.length > 0) {
           isWaitingForAgent = false;
 
@@ -391,11 +401,17 @@
     }
 
     try {
-      await POST("/api/chat/send", {
-        message: userMsg,
-        isSystem: false,
-        metadata: await getMetadata(),
-      });
+      await POST(
+        "/api/chat/send",
+        {
+          message: userMsg,
+          isSystem: false,
+          metadata: await getMetadata(),
+        },
+        endpoint,
+        apiKey,
+        sessionId,
+      );
 
       startPolling();
     } catch (error) {
@@ -409,9 +425,15 @@
     localStorage.setItem("chat_user_email", userEmail);
 
     try {
-      await POST("/api/chat/email", {
-        email: userEmail,
-      });
+      await POST(
+        "/api/chat/email",
+        {
+          email: userEmail,
+        },
+        endpoint,
+        apiKey,
+        sessionId,
+      );
 
       /*await fetch("/api/chat/email", {
         method: "POST",
