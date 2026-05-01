@@ -7,6 +7,7 @@ import adminRouter from './admin'
 import chatRouter from './chat'
 
 import { handleError } from "@/utils";
+import { serveStatic } from '@hono/node-server/serve-static'; 
 
 const app = new Hono();
 
@@ -21,6 +22,8 @@ app.use(
 );
 
 app.get("/health", (c) => c.text("Surviving Bro!"));
+
+app.get('/script', serveStatic({ path: './public/script.js' }));
   
 app.route("/api/auth", authRouter);
 app.route("/api/project", projectRouter);

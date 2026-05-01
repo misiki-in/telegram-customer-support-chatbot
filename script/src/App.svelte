@@ -21,7 +21,7 @@
   };
 
   // Props
-  let { apiKey = "", endpoint = "" } = $props();
+  const { apiKey = "", endpoint = "" } = $props();
 
   // State using runes
   let isOpen = $state(false);

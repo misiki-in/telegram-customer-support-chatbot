@@ -3,13 +3,20 @@ import './app.css'
 import App from './App.svelte'
 
 export class TelegramSupportBot {
-  CONTAINER_ID = "telegram-support-bot"
+  private static CONTAINER_ID = "telegram-support-bot"
   private apiKey: string
   private endpoint: string
 
-  constructor(endpoint: string, apiKey: string, container: HTMLElement) {
-    this.apiKey = apiKey
-    this.endpoint = endpoint
+  constructor() {
+    this.endpoint = window.TELEGRAM_CHATBOT_ENDPOINT
+    this.apiKey = window.TELEGRAM_CHATBOT_KEY
+
+    if (!this.endpoint)
+      throw "TELEGRAM_CHATBOT_ENDPOINT not found"
+    if (!this.apiKey)
+      throw "TELEGRAM_CHATBOT_KEY"
+
+    const container = TelegramSupportBot.ensureContainer()
 
     try {
       untrack(() => {
@@ -26,7 +33,7 @@ export class TelegramSupportBot {
     }
   }
 
-  ensureContainer = (): HTMLElement => {
+  private static ensureContainer = (): HTMLElement => {
     const container = document.getElementById(this.CONTAINER_ID)
     if (container) return container
 
@@ -36,3 +43,6 @@ export class TelegramSupportBot {
     return ele
   }
 }
+
+console.log("hello")
+new TelegramSupportBot()

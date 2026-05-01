@@ -2,6 +2,7 @@
 node_modules
 
 # output
+public/script.js
 out
 dist
 *.tgz

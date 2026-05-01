@@ -1,6 +1,7 @@
 {
-  "name": "@misiki/telegram-chatbot",
-  "version": "0.0.1",
+  "name": "telegram-chatbot",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -8,20 +9,6 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
-  "main": "./dist/main.umd.cjs",
-  "module": "./dist/main.js",
-  "types": "./dist/main.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/main.d.ts",
-      "import": "./dist/main.js",
-      "require": "./dist/main.umd.cjs"
-    },
-    "./style.css": "./dist/main.css"
-  },
-  "files": [
-    "dist"
-  ],
   "devDependencies": {
     "@lucide/svelte": "^0.577.0",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
@@ -30,7 +17,6 @@
     "svelte": "^5.53.7",
     "svelte-check": "^4.4.5",
     "typescript": "~5.9.3",
-    "vite": "^8.0.0",
-    "vite-plugin-dts": "^4.5.4"
+    "vite": "^8.0.0"
   }
 }

@@ -7,6 +7,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import { Pencil, X } from 'lucide-svelte';
 	import Input from '$lib/components/Input.svelte';
+	import { formatScriptText } from '$lib';
 
 	interface Project {
 		id: string;
@@ -38,10 +39,16 @@
 	let botToken = $state('');
 	let updatingBotToken = $state(false);
 
+	// Integrate Modal state
+	let showIntegrateModal = $state(false);
+	let integrationCopied = $state(false);
+
+	const integrationScript = $derived(formatScriptText(page.params.id || ''))
+
 	function openNameModal() {
 		if (project) {
 			projectName = project.name;
-      chatId = project.chatId
+			chatId = project.chatId
 			showNameModal = true;
 		}
 	}
@@ -53,12 +60,29 @@
 
 	function openBotSettingsModal() {
 		showBotSettingsModal = true;
-    botToken = project?.bot?.token || ''
+		botToken = project?.bot?.token || ''
 	}
 
 	function closeBotSettingsModal() {
 		showBotSettingsModal = false;
 		botToken = '';
+	}
+
+	function openIntegrateModal() {
+		showIntegrateModal = true;
+	}
+
+	function closeIntegrateModal() {
+		showIntegrateModal = false;
+	}
+
+	async function copyIntegrationScript() {
+		await navigator.clipboard.writeText(integrationScript);
+		integrationCopied = true;
+		toast.success('Integration script copied to clipboard!');
+		setTimeout(() => {
+			integrationCopied = false;
+		}, 2000);
 	}
 
 	// Sync state
@@ -148,6 +172,7 @@
 			if (showNameModal) closeNameModal();
 			if (showSyncModal) showSyncModal = false;
 			if (showBotSettingsModal) closeBotSettingsModal();
+			if (showIntegrateModal) closeIntegrateModal();
 		}
 	}
 </script>
@@ -200,6 +225,16 @@
 					<div class="flex flex-col sm:flex-row gap-2 sm:gap-2">
 						<Button
 							variant="secondary"
+							onclick={openIntegrateModal}
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+							</svg>
+							Integrate
+						</Button>
+
+						<Button
+							variant="secondary"
 							onclick={openBotSettingsModal}
 						>
 							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,7 +244,7 @@
 							Bot Settings
 						</Button>
 
-						<Button
+						<!-- <Button
 							onclick={copyKey}
 							class={copied ? 'bg-green-600 hover:bg-green-700' : ''}
 						>
@@ -222,7 +257,7 @@
 								/>
 							</svg>
 							{copied ? 'Key copied!' : 'Copy Key'}
-						</Button>
+						</Button> -->
 
 						<!-- <Button
 							variant="secondary"
@@ -459,6 +494,84 @@
 						</Button>
 					</div>
 				</form>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Integrate Modal -->
+	{#if showIntegrateModal}
+		<!-- Backdrop -->
+		<div
+			class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
+			onclick={closeIntegrateModal}
+			role="button"
+			tabindex="0"
+			aria-label="Close modal"
+		></div>
+
+		<!-- Modal -->
+		<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+			<div
+				class="relative w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="integrate-modal-title"
+			>
+				<!-- Header -->
+				<div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+					<h2 id="integrate-modal-title" class="text-lg font-semibold text-gray-900">Integrate Bot</h2>
+					<Button
+						variant="ghost"
+						onclick={closeIntegrateModal}
+						class="rounded-lg p-2"
+						aria-label="Close"
+					>
+						<X class="h-5 w-5" />
+					</Button>
+				</div>
+
+				<!-- Content -->
+				<div class="px-6 py-6">
+					<div class="space-y-4">
+						<div>
+							<p class="text-sm font-medium text-gray-700 mb-2">
+								Paste this snippet in your html file
+							</p>
+							<div class="relative group">
+								<pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono leading-relaxed"><code>{integrationScript}</code></pre>
+							</div>
+						</div>
+					</div>
+
+					<!-- Actions -->
+					<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-2">
+						<Button
+							type="button"
+							variant="secondary"
+							onclick={closeIntegrateModal}
+							class="w-full sm:w-auto px-4 py-3"
+						>
+							Cancel
+						</Button>
+						<Button
+							type="button"
+							onclick={copyIntegrationScript}
+							class="w-full sm:w-auto px-4 py-3 {integrationCopied ? 'bg-green-600 hover:bg-green-700' : ''}"
+						>
+							{#if integrationCopied}
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+								</svg>
+								<span>Copied!</span>
+							{:else}
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+								</svg>
+								<span>Copy Code</span>
+							{/if}
+						</Button>
+					</div>
+				</div>
 			</div>
 		</div>
 	{/if}
