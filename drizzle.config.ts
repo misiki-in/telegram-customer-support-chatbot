@@ -5,6 +5,7 @@ const databaseUrl = env.DATABASE_URL;
 
 export default defineConfig({
 	schema: './src/db/schema/index.ts',
+	out: './drizzle',
 	dialect: 'postgresql',
 	dbCredentials: { url: databaseUrl },
 	verbose: true,
